@@ -4,6 +4,12 @@ const dotenv = require("dotenv");
 const colors = require("colors");
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/error");
+const mongoSanitize = require("express-mongo-sanitize");
+const helmet = require("helmet");
+const xss = require("xss-clean");
+const rateLimit = require("express-rate-limit");
+const hpp = require("hpp");
+const cors = require("cors");
 const bootcamps = require("./routes/bootcamps");
 const courses = require("./routes/courses");
 const auth = require("./routes/auth");
@@ -26,6 +32,19 @@ if (process.env.NODE_ENV === "development") {
 }
 // const logger = require("./middleware/logger");
 // app.use(logger);
+app.use(helmet());
+app.use(mongoSanitize());
+app.use(xss());
+
+const limiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 100,
+});
+
+app.use(limiter);
+app.use(hpp());
+app.use(cors());
+
 app.use(cookieParser());
 app.use(fileupload());
 
